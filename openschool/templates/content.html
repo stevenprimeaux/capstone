@@ -1,0 +1,92 @@
+<p>{{ data.jwt }}</p>
+
+<div>
+  <form id="form-school">
+    <label for="school_id">School ID</label><br>
+    <input type="text" id="school_id" name="school_id"><br>
+    <label for="schoolname">School Name</label><br>
+    <input type="text" id="schoolname" name="name"><br>
+    <label for="schooladdress">School Address</label><br>
+    <input type="text" id="schooladdress" name="address"><br>
+    <input type="button" id="get-schools" value="Get schools"><br>
+    <input type="button" id="post-school" value="Post school"><br>
+    <input type="button" id="patch-school" value="Patch school"><br>
+    <input type="button" id="delete-school" value="Delete school"><br>
+    <input type="button" id="get-students-school" value="Get students by school"><br>
+    <input type="button" id="get-students" value="Get all students">
+  </form>
+</div>
+
+<script>
+
+  document.getElementById("get-schools").addEventListener("click", getSchools);
+  document.getElementById("post-school").addEventListener("click", postSchool);
+  document.getElementById("patch-school").addEventListener("click", patchSchool);
+  document.getElementById("delete-school").addEventListener("click", deleteSchool);
+  document.getElementById("get-students-school").addEventListener("click", getStudentsSchool);
+  document.getElementById("get-students").addEventListener("click", getStudents);
+
+  var jwt = {{ data.jwt|tojson }};
+  var httpRequest = new XMLHttpRequest();
+  httpRequest.onreadystatechange = alertContents;
+
+  function alertContents() {
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+      alert(httpRequest.responseText);
+    }
+  }
+
+  function getRequest(endpoint) {
+    httpRequest.open("GET", endpoint);
+    httpRequest.setRequestHeader("Authorization", "Bearer " + jwt);
+    httpRequest.send();
+  }
+
+  function getSchools() {
+    getRequest("schools");
+  }
+
+  function getStudents() {
+    getRequest("students");
+  }
+
+  function postSchool() {
+    var data = new FormData(document.getElementById("form-school"));
+    data.delete("school_id")
+    const j = {};
+    data.forEach((value, key) => (j[key] = value));
+    httpRequest.open("POST", "schools");
+    httpRequest.setRequestHeader("Content-Type", "application/json");
+    httpRequest.setRequestHeader("Authorization", "Bearer " + jwt);
+    httpRequest.send(JSON.stringify(j));
+  }
+
+  function patchSchool() {
+    var school_id = document.getElementById("school_id").value;
+    var data = new FormData(document.getElementById("form-school"));
+    data.delete("school_id")
+    const j = {};
+    data.forEach((value, key) => (j[key] = value));
+    httpRequest.open("PATCH", "schools/" + school_id);
+    httpRequest.setRequestHeader("Content-Type", "application/json");
+    httpRequest.setRequestHeader("Authorization", "Bearer " + jwt);
+    httpRequest.send(JSON.stringify(j));
+  };
+
+  function deleteSchool() {
+    var school_id = document.getElementById("school_id").value;
+    httpRequest.open("DELETE", "schools/" + school_id);
+    httpRequest.setRequestHeader("Authorization", "Bearer " + jwt);
+    httpRequest.send();
+  }
+
+  function getStudentsSchool() {
+    var school_id = document.getElementById("school_id").value;
+    httpRequest.open("GET", "schools/" + school_id + "/students");
+    httpRequest.setRequestHeader("Authorization", "Bearer " + jwt);
+    httpRequest.send();
+  }
+
+</script>
+
+<a href="/logout">logout</a>
